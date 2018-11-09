@@ -1,4 +1,4 @@
-<p align="center"><img style="width:390px;" src="resources/images/distillery-logo.svg"></p>
+<p align="center"><img width="390" src="resources/images/distillery-logo.svg"></p>
 
 <p align="center">
 <a href="https://packagist.org/packages/matejsvajger/laravel-distillery"><img src="https://poser.pugx.org/matejsvajger/laravel-distillery/d/total.svg" alt="Total Downloads"></a>
@@ -299,6 +299,7 @@ And to apply it: `/product-list?search=socks&sort=price-desc&color[]=2&color[]=5
 - [ ] Add possibility to generate standard predefined filters (sort, search, ...).
 - [ ] Make possible to define which paramateres to hide from url query strings.
 - [ ] Write tests.
+- [ ] Add fallback to general filters that can be re-used across different models.
 
 ## License
 
