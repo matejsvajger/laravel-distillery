@@ -1,0 +1,43 @@
+{
+    "name": "matejsvajger/laravel-distillery",
+    "description": "An elegan way of filtering Eloquent models.",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Matej Svajger",
+            "email": "hello@matejsvajger.com"
+        }
+    ],
+    "require": {
+        "php": "^7.1.3"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^7.4",
+        "orchestra/testbench": "^3.7"
+    },
+    "autoload": {
+        "psr-4": {
+            "matejsvajger\\Distillery\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "matejsvajger\\Distillery\\Tests\\": "tests"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "matejsvajger\\Distillery\\DistilleryServiceProvider"
+            ],
+            "aliases": {
+                "Distillery": "matejsvajger\\Distillery\\DistilleryFacade"
+            }
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

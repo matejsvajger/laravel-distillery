@@ -1,0 +1,14 @@
+<?php
+
+namespace DummyNamespace;
+
+use Illuminate\Database\Eloquent\Model;
+use matejsvajger\Distillery\Contracts\Filter;
+
+class DummyClass implements Filter
+{
+    public static function apply(Builder $builder, $value)
+    {
+        return $builder;
+    }
+}
