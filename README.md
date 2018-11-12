@@ -77,7 +77,7 @@ class ProductListController extends Controller
 }
 ```
 
-By default you will get a paginated response of 10 items. You can adjust the default limit in config.
+By default you will get a paginated response of 15 items. This is the default Eloquent model value on `$perPage` property. You can adjust it the standard way or set a default value in distillery model config.
 
 To add pagination links to the view call `$products->links();` in your blade template:
 
@@ -189,16 +189,28 @@ php artisan make:resource Product
 and check out the [docs](https://laravel.com/docs/5.7/eloquent-resources#writing-resources) on how to use them.
 
 ### Default filter values per model
-It is possible to define default filter values per model. For example if you want by default a different default items per page for some model you need to define a `distilleryDefaults` function on the model itself and return an array of default filter values:
+It is possible to define default filter values per model. For example if you want a default filter value for some model you can do it with a 'default' key in a  `protected $distillery` array on the model itself:
 
 ```php
 class User extends Model {
-    public static function distilleryDefaults()
-    {
-        return [
-            'limit' => 25
-        ];
-    }
+    protected $distillery = [
+        'default' => [
+            'sort' => 'updated_at-desc'
+        ]
+    ];
+}
+```
+
+### Hide filters from URI QueryString
+There is a `'hidden'` config array available on model to hide filters from URI when those are applied serverside:
+
+```php
+class User extends Model {
+    protected $distillery = [
+        'hidden' => [
+            'category' // - applied in controller; set from seo url
+        ]
+    ];
 }
 ```
 
@@ -297,7 +309,7 @@ And to apply it: `/product-list?search=socks&sort=price-desc&color[]=2&color[]=5
 ## Roadmap to 1.0.0
 
 - [ ] Add possibility to generate standard predefined filters (sort, search, ...).
-- [ ] Make possible to define which paramateres to hide from url query strings.
+- [*] Make possible to define which paramateres to hide from url query strings.
 - [ ] Add fallback to general filters that can be re-used across different models.
 - [ ] Write tests.
 

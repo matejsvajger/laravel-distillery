@@ -134,8 +134,14 @@ class DistilledCollection extends ResourceCollection
      */
     protected function qs()
     {
+        $config = $this->resource->first()->getDistilleryConfig();
+        $hidden = array_key_exists('hidden', $config) ? $config['hidden'] : [];
+
         return '&' . http_build_query(
-            $this->filters->except('page')->all()
+            $this->filters->except(array_merge(
+                ['page'],
+                $hidden
+            ))->all()
         );
     }
 }
