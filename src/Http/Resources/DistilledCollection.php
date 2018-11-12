@@ -3,8 +3,10 @@
 namespace matejsvajger\Distillery\Http\Resources;
 
 use Illuminate\Http\Resources\Json\ResourceCollection;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Pagination\UrlWindow;
 use Illuminate\Support\Collection;
+use Illuminate\Support\HtmlString;
 
 class DistilledCollection extends ResourceCollection
 {
@@ -69,6 +71,33 @@ class DistilledCollection extends ResourceCollection
     {
         $url = parent::nextPageUrl();
         return $url ? $url . $this->qs() : null;
+    }
+
+    /**
+     * Render the paginator using the given view.
+     *
+     * @param  string|null  $view
+     * @param  array  $data
+     * @return \Illuminate\Support\HtmlString
+     */
+    public function links($view = null, $data = [])
+    {
+        return $this->render($view, $data);
+    }
+
+    /**
+     * Render the paginator using the given view.
+     *
+     * @param  string|null  $view
+     * @param  array  $data
+     * @return \Illuminate\Support\HtmlString
+     */
+    public function render($view = null, $data = [])
+    {
+        return new HtmlString(static::viewFactory()->make($view ? : Paginator::$defaultView, array_merge($data, [
+            'paginator' => $this,
+            'elements' => $this->elements(),
+        ]))->render());
     }
 
     /**
