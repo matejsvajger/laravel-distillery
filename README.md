@@ -189,16 +189,15 @@ php artisan make:resource Product
 and check out the [docs](https://laravel.com/docs/5.7/eloquent-resources#writing-resources) on how to use them.
 
 ### Default filter values per model
-It is possible to define default filter values per model. For example if you want by default a different default items per page for some model you need to define a `distilleryDefaults` function on the model itself and return an array of default filter values:
+It is possible to define default filter values per model. For example if you want a default filter value for some model you can do it with a 'default' key in a  `protected $distillery` array on the model itself:
 
 ```php
 class User extends Model {
-    public static function distilleryDefaults()
-    {
-        return [
-            'limit' => 25
-        ];
-    }
+    protected $distillery = [
+        'default' => [
+            'sort' => 'updated_at-desc'
+        ]
+    ];
 }
 ```
 

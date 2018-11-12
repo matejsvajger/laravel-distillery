@@ -64,11 +64,10 @@ class Distillery
 
     private function applyDefaults(Model $model, Collection $filters)
     {
-        if (method_exists($model, 'distilleryDefaults')) {
-            foreach ($model->distilleryDefaults() as $key => $value) {
-                if (! $filters->has($key)) {
-                    $filters->put($key, $value);
-                }
+        $config = $model->getDistilleryConfig();
+        if (array_key_exists('default', $config) && is_array($config['default'])) {
+            foreach ($config['default'] as $key => $value) {
+                ! $filters->has($key) && $filters->put($key, $value);
             }
         }
 
