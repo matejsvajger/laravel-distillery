@@ -1,4 +1,4 @@
-<p align="center"><img style="width:390px;" src="resources/images/distillery-logo.svg"></p>
+<p align="center"><img width="390" src="resources/images/distillery-logo.svg"></p>
 
 <p align="center">
 <a href="https://packagist.org/packages/matejsvajger/laravel-distillery"><img src="https://poser.pugx.org/matejsvajger/laravel-distillery/d/total.svg" alt="Total Downloads"></a>
@@ -250,14 +250,14 @@ php artisan distillery:filter Sort Product
 ```php
 class Sort implements Filter
 {
-    protected $allowed = ['price', 'name', 'updated_at'];
+    protected static $allowed = ['price', 'name', 'updated_at'];
     
     public static function apply(Builder $builder, $value)
     {
         if (Str::endsWith($value, ['-asc', '-desc'])) {
             [$field, $dir] = explode('-', $value);
             
-            if (in_array($field, $this->allowed)) {
+            if (in_array($field, static::$allowed)) {
                 return $builder->orderBy($field, $dir);
             }
         }
@@ -298,6 +298,7 @@ And to apply it: `/product-list?search=socks&sort=price-desc&color[]=2&color[]=5
 
 - [ ] Add possibility to generate standard predefined filters (sort, search, ...).
 - [ ] Make possible to define which paramateres to hide from url query strings.
+- [ ] Add fallback to general filters that can be re-used across different models.
 - [ ] Write tests.
 
 ## License
