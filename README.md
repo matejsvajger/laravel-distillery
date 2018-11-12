@@ -201,6 +201,19 @@ class User extends Model {
 }
 ```
 
+### Hide filters from URI QueryString
+There is a `'hidden'` config array available on model to hide filters from URI when those are applied serverside:
+
+```php
+class User extends Model {
+    protected $distillery = [
+        'hidden' => [
+            'category' // - applied in controller; set from seo url
+        ]
+    ];
+}
+```
+
 ### API Filter-Pagination Route
 _Distillery comes with a standard filtering route, where you can filter/paginate any model automatically without attaching traits to models._
 
@@ -296,7 +309,7 @@ And to apply it: `/product-list?search=socks&sort=price-desc&color[]=2&color[]=5
 ## Roadmap to 1.0.0
 
 - [ ] Add possibility to generate standard predefined filters (sort, search, ...).
-- [ ] Make possible to define which paramateres to hide from url query strings.
+- [*] Make possible to define which paramateres to hide from url query strings.
 - [ ] Add fallback to general filters that can be re-used across different models.
 - [ ] Write tests.
 
