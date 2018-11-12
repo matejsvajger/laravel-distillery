@@ -6,21 +6,6 @@ use Distillery;
 
 trait Distillable
 {
-
-    /**
-     * Distillery model config array.
-     *
-     * @var int
-     */
-    protected $distillery = [
-        'hidden' => [
-            //
-        ],
-        'default' => [
-            //
-        ]
-    ];
-
     /**
      * Get the Distilled collection.
      *
@@ -38,7 +23,16 @@ trait Distillable
      */
     public function getDistilleryConfig()
     {
-        return $this->distillery;
+        return property_exists($this, 'distillery')
+            ? $this->distillery
+            : [
+                'hidden' => [
+                    //
+                ],
+                'default' => [
+                    //
+                ]
+            ];
     }
 
     /**
@@ -53,5 +47,4 @@ trait Distillable
 
         return $this;
     }
-
 }
