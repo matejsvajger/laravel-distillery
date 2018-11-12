@@ -4,21 +4,6 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Distillery Pagination Configuration
-    |--------------------------------------------------------------------------
-    |
-    | You can setup the default number of items returend in the filtered
-    | collection. Can be overwritten on the model or through the request
-    | parameter: `limit`.
-    |
-    */
-
-    'pagination' => [
-        'limit' => 10,
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
     | Distillery Filter Configuration
     |--------------------------------------------------------------------------
     |

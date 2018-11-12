@@ -37,7 +37,7 @@ class Distillery
         $builder = static::applyFilters($model, $filters);
 
         return $builder->paginate(
-            $filters->get('limit', config('distillery.pagination.limit'))
+            $filters->get('limit', $model->getPerPage())
         );
     }
 

@@ -77,7 +77,7 @@ class ProductListController extends Controller
 }
 ```
 
-By default you will get a paginated response of 10 items. You can adjust the default limit in config.
+By default you will get a paginated response of 15 items. This is the default Eloquent model value on `$perPage` property. You can adjust it the standard way or set a default value in distillery model config.
 
 To add pagination links to the view call `$products->links();` in your blade template:
 
