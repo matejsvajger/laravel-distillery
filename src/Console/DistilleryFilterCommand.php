@@ -37,22 +37,53 @@ class DistilleryFilterCommand extends GeneratorCommand
      */
     public function handle()
     {
-        $name  = Str::studly($this->argument('name'));
-        $model = Str::studly($this->argument('model'));
-
+        $name = Str::studly($this->argument('name'));
         $this->input->setArgument('name', $name);
-        $this->input->setArgument('model', $model);
 
-        $model = $this->qualifyModel($model);
+        if ($this->argument('model')) {
+            $model = $this->handleModel();
 
-        if (! class_exists($model)) {
-            $this->error('Model ' . $model . ' doesn\'t exist!');
-            return false;
+            if (empty($model)) {
+                $this->error('Model ' . $this->qualifyModel($model) . ' doesn\'t exist!');
+                return false;
+            }
         }
 
         if (parent::handle() === false && ! $this->option('force')) {
             return;
         }
+    }
+
+    /**
+     * Handles model argument
+     * Transforms name into PSR-4 class name and
+     * checks if model exists and returns fqn.
+     *
+     * @return string|null
+     */
+    public function handleModel()
+    {
+        $model = Str::studly($this->argument('model'));
+        $this->input->setArgument('model', $model);
+
+        if ($this->modelExists($model)) {
+            return $this->qualifyModel($model);
+        }
+
+        return null;
+    }
+
+    /**
+     * Checks if model exists.
+     *
+     * @param string $model
+     * @return bool
+     */
+    public function modelExists($model)
+    {
+        return class_exists(
+            $this->qualifyModel($model)
+        );
     }
 
     /**
@@ -91,14 +122,15 @@ class DistilleryFilterCommand extends GeneratorCommand
     }
 
     /**
-     * Get the default namespace for the class.
+     * Get the default namespace for the filter.
      *
      * @param  string  $rootNamespace
      * @return string
      */
     protected function getDefaultNamespace($rootNamespace)
     {
-        return config('distillery.filters.namespace') . '\\' . $this->argument('model');
+        $model = $this->argument('model');
+        return config('distillery.filters.namespace') . ($model ? '\\' . $model : '');
     }
 
     /**
@@ -123,7 +155,7 @@ class DistilleryFilterCommand extends GeneratorCommand
 
             ['name', InputArgument::REQUIRED, 'The name of the filter'],
 
-            ['model', InputArgument::REQUIRED, 'The name of the model'],
+            ['model', InputArgument::OPTIONAL, 'The name of the model'],
 
         ];
     }
