@@ -26,6 +26,7 @@ trait Distillable
         return property_exists($this, 'distillery')
             ? $this->distillery
             : [
+                'fallback' => false,
                 'hidden' => [
                     //
                 ],

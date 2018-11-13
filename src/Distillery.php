@@ -26,7 +26,8 @@ class Distillery
         return new DistilledCollection(
             $this->filter($model, $filters),
             $this->buildFilters($model, $filters),
-            $this->collects($model)
+            $this->collects($model),
+            $model->getDistilleryConfig()
         );
     }
 
