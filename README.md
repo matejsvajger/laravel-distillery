@@ -67,7 +67,7 @@ class ProductListController extends Controller
 
 ### Pagination
 
-By default you will get a paginated response of 15 items. This is the default Eloquent model value on `$perPage` property. You can adjust it by overwriting the value in your model or set a default value for `limit` in [distillery model property](#default-filter-values-per-model).
+`distill()` will return a paginated response of 15 items. This is the default Eloquent model value on `$perPage` property. You can adjust it by overwriting the value in your model or set a default value for `limit` in [distillery model property](#default-filter-values-per-model).
 
 To add pagination links to the view call `$products->links();` in your blade template:
 
@@ -91,11 +91,11 @@ To add pagination links to the view call `$products->links();` in your blade tem
 
 There you have it, a paginated list of Product models.
 
-_What!? This is just like Laravels' Paginator! Right, we'll want to filter it too? Ok, carry on._
+_What!? This is just like Laravel's Paginator!_ Right, we'll want to filter it too, eh? Ok, carry on.
 
 ### Filtering
 
-Distillery comes with an Artisan generator command that scaffolds your filter classes for existing models. Signature has two required parameters: `'distillery:filter {filter} {model}'`
+Distillery comes with an Artisan generator command that scaffolds your filter classes for existing models. Signature has two parameters: `'distillery:filter {filter} {model?}'`
 
 For example if we want to filter the above product list with a search query on `name` and `description` we'll need a search filter for product model. Let's create it:
 
@@ -245,7 +245,7 @@ Models filterable by this route need to be added to the `distillery.routing.mode
         ],
 
         'models' => [
-            App\Models\Product::class,
+            'product' => App\Models\Product::class,
         ]
     ],
 ```
