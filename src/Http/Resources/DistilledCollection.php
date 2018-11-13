@@ -20,8 +20,9 @@ class DistilledCollection extends ResourceCollection
      * @param  string  $collects
      * @return void
      */
-    public function __construct($resource, Collection $filters, string $collects = null)
+    public function __construct($resource, Collection $filters, string $collects = null, array $config = null)
     {
+        $this->config   = $config;
         $this->filters  = $filters;
         $this->collects = $collects;
 
@@ -36,21 +37,30 @@ class DistilledCollection extends ResourceCollection
      */
     public function toArray($request)
     {
-        return [
-            'hasPages'     => $this->hasPages(),
-            'onFirstPage'  => $this->onFirstPage(),
-            'hasMorePages' => $this->hasMorePages(),
-
-            'currentPage'     => $this->currentPage(),
-            'nextPageUrl'     => $this->nextPageUrl(),
-            'previousPageUrl' => $this->previousPageUrl(),
-
-            'data'     => $this->collection,
-            'elements' => $this->elements(),
-            'total'    => $this->total()
-        ];
+        return parent::toArray($request);
     }
 
+    /**
+     * Get additional data that should be returned with the resource array.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return array
+     */
+    public function with($request)
+    {
+        return [
+            'pagination' => $this->elements(),
+
+            'meta' => [
+                'has_pages' => $this->hasPages(),
+                'on_first_page' => $this->onFirstPage(),
+                'has_more_pages' => $this->hasMorePages(),
+
+                'next_page_url' => $this->nextPageUrl(),
+                'previous_page_url' => $this->previousPageUrl(),
+            ],
+        ];
+    }
     /**
      * Get the URL for the previous page, or null.
      *
@@ -107,24 +117,25 @@ class DistilledCollection extends ResourceCollection
      */
     protected function elements()
     {
-        $window = UrlWindow::make($this->resource);
         $qs = $this->qs();
+        $window = UrlWindow::make($this->resource);
 
-        foreach ($window as $key => &$value) {
+        foreach ($window as $key => $value) {
             if (is_array($value)) {
-                foreach ($value as &$url) {
-                    $url .= $qs;
+                foreach ($value as $index => $url) {
+                    $value[$index] = $url . $qs;
                 }
+                $window[$key] = $value;
             }
         }
 
-        return array_filter([
+        return array_values(array_filter([
             $window['first'],
             is_array($window['slider']) ? '...' : null,
             $window['slider'],
             is_array($window['last']) ? '...' : null,
             $window['last'],
-        ]);
+        ]));
     }
 
     /**
@@ -134,14 +145,14 @@ class DistilledCollection extends ResourceCollection
      */
     protected function qs()
     {
-        $config = $this->resource->first()->getDistilleryConfig();
-        $hidden = array_key_exists('hidden', $config) ? $config['hidden'] : [];
+        $hidden  = is_array($this->config) && array_key_exists('hidden', $this->config) ? $this->config['hidden'] : [];
+        $filters = $this->filters->except(array_merge(
+            ['page'],
+            $hidden
+        ));
 
-        return '&' . http_build_query(
-            $this->filters->except(array_merge(
-                ['page'],
-                $hidden
-            ))->all()
-        );
+        return $filters->count() > 0 ? '&' . http_build_query(
+            $filters->all()
+        ) : '';
     }
 }

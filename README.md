@@ -25,28 +25,7 @@ php artisan vendor:publish --tag=distillery-config
 
 After publishing Distillery's config, its configuration file will be located at `config/distillery.php`. This configuration file allows you to configure your application setup options and each configuration option includes a description of its purpose, so be sure to thoroughly explore this file.
 
-## How it works
-
-The idea behind Distillery is that every request parameter is a filter name/value pair. Distillery loops through all request parameters, checks if the filter for selected model exists and builds a filtered resource collection based on their values.
-
-By default Distillery predicts that you have:
-
-- models stored in `app/Models`,
-- resources stored in `app/Http/Resources`,
-- and that filters will be in `app/Filters`.
-
-All values are configurable through the config file.
-
-Filter names
-
-- _page_ and
-- _limit_
-
-are **reserved** for laravel pagination.
-
 ## Quickstart
-
-### Pagination
 
 Let's say you have a long list of products on route: `/product-list` all you need to do is attach `Distillable` trait to your Product model:
 
@@ -57,7 +36,16 @@ use Illuminate\Database\Eloquent\Model;
 use matejsvajger\Distillery\Traits\Distillable;
 
 class Product extends Model {
-	use Distillable;
+    use Distillable;
+    
+    protected $distillery = [
+        'hidden' => [
+            //
+        ],
+        'default' => [
+            //
+        ]
+    ];
 	
 	...
 }
@@ -77,7 +65,9 @@ class ProductListController extends Controller
 }
 ```
 
-By default you will get a paginated response of 15 items. This is the default Eloquent model value on `$perPage` property. You can adjust it the standard way or set a default value in distillery model config.
+### Pagination
+
+By default you will get a paginated response of 15 items. This is the default Eloquent model value on `$perPage` property. You can adjust it by overwriting the value in your model or set a default value for `limit` in [distillery model property](#default-filter-values-per-model).
 
 To add pagination links to the view call `$products->links();` in your blade template:
 
@@ -101,7 +91,7 @@ To add pagination links to the view call `$products->links();` in your blade tem
 
 There you have it, a paginated list of Product models.
 
-What? Right, we'll want to filter it too? Ok, carry on.
+_What!? This is just like Laravels' Paginator! Right, we'll want to filter it too? Ok, carry on._
 
 ### Filtering
 
@@ -141,9 +131,28 @@ class Search implements Filter
 
 Then to apply the filter to the previous product list you would just add a search query string parameter to the url:
 
-`/product-list?search=socks`
+`/product-list?search=socks` and the paginated collection will be automatically filtered and pagination links will reflect the set filters.
 
-For more examples on filters check the **Examples** section.
+For more examples on filters check the [**Examples**](#examples) section.
+
+## How it works
+
+The idea behind Distillery is that every request parameter is a filter name/value pair. Distillery loops through all request parameters, checks if the filter for selected model exists and builds a filtered resource collection based on their values.
+
+By default Distillery predicts that you have:
+
+- models stored in `app/Models`,
+- resources stored in `app/Http/Resources`,
+- and that filters will be in `app/Filters`.
+
+All values are configurable through the config file.
+
+Filter names
+
+- _page_ and
+- _limit_
+
+are **reserved** for laravel paginator.
 
 <hr>
 
@@ -155,7 +164,7 @@ Sometimes you'll want to attach additional filters on server-side. By default yo
 
 Normally you wouldn't want to pass the category id in paramaters since it's already defined with a seo slug.
 
-If you have a Category filter that accepts an id and filters on the product category relation you can attach it in your controller:
+You can add aditional filters not defined in URI or overwrite those by passing an array into distill function. _i.e.:_ If you have a Category filter that accepts an id, attach it in your controller:
 
 ```php
 public function list(Request $request, Category $category)
@@ -163,7 +172,6 @@ public function list(Request $request, Category $category)
     return view('product.list',[
         'products' => Product::distill([
             'category' => $category->id,
-            ...$request->all()
         ]);
     ]);	
 }
@@ -174,11 +182,11 @@ Distillery comes with a facade that gives you an option to distill any model wit
 It takes two parameters, Model FQN and filter array.
 
 ```php
-\Distillery::distill(Product::class, $filters);
+Distillery::distill(Product::class, $filters);
 ```
 
 ### Model Resources
-If you're using Distillery as API endpoints you probabbly don't want to expose your whole model to the world or maybe you want to attach some additional data. Distillery by default checks if [Eloquent resources](https://laravel.com/docs/5.7/eloquent-resources) exist and maps the filtered collection to them otherwise it returns normal models.
+If you're using Distillery as API endpoints you probabbly don't want to expose your whole model to the world or maybe you want to attach some additional data. Distillery checks if [Eloquent resources](https://laravel.com/docs/5.7/eloquent-resources) exist and maps the filtered collection to them, otherwise it returns normal models.
 
 If you don't have them just create them with Artisan
 
@@ -309,10 +317,9 @@ And to apply it: `/product-list?search=socks&sort=price-desc&color[]=2&color[]=5
 ## Roadmap to 1.0.0
 
 - [ ] Add possibility to generate standard predefined filters (sort, search, ...).
-- [*] Make possible to define which paramateres to hide from url query strings.
-- [ ] Add fallback to general filters that can be re-used across different models.
+- [x] Make possible to define which paramateres to hide from url query strings.
+- [x] Add fallback to general filters that can be re-used across different models.
 - [ ] Write tests.
-- [ ] Add fallback to general filters that can be re-used across different models.
 
 ## License
 

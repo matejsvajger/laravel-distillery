@@ -26,7 +26,8 @@ class Distillery
         return new DistilledCollection(
             $this->filter($model, $filters),
             $this->buildFilters($model, $filters),
-            $this->collects($model)
+            $this->collects($model),
+            $model->getDistilleryConfig()
         );
     }
 
@@ -44,8 +45,8 @@ class Distillery
     public function collects($model)
     {
         $model = is_string($model) ? new $model : $model;
-        $modelname = with(new ReflectionClass($model))->getShortName();
-        $resource = $this->createResourceDecorator($modelname);
+        $modelclass = with(new ReflectionClass($model))->getShortName();
+        $resource = $this->createResourceDecorator($modelclass);
 
         return config('distillery.resource.enabled') && $this->isValidDecorator($resource)
             ? $resource
@@ -56,8 +57,11 @@ class Distillery
     {
         return $this->applyDefaults(
             $model,
-            $filters
-                ? (is_array($filters) ? collect($filters) : $filters)
+            is_array($filters)
+                ? collect(array_merge(
+                    $this->request->all(),
+                    $filters
+                ))
                 : collect($this->request->all())
         );
     }
@@ -91,20 +95,27 @@ class Distillery
 
     private function createFilterDecorator(Model $model, string $filter) : string
     {
+        $config = $model->getDistilleryConfig();
         $namespace = config('distillery.filters.namespace');
-        $modelname = with(new ReflectionClass($model))->getShortName();
+        $modelclass = with(new ReflectionClass($model))->getShortName();
+        $fallback = array_key_exists('fallback', $config) && $config['fallback'] === true;
 
-        return $namespace . "\\${modelname}\\" . str_replace(
-            ' ',
-            '',
-            ucwords(str_replace('_', ' ', strtolower($filter)))
-        );
+        $filterclass = str_replace(' ', '', ucwords(
+            str_replace('_', ' ', strtolower($filter))
+        ));
+
+        $decorator = $namespace . "\\${modelclass}\\" . $filterclass;
+        $filterFQN = $fallback
+            ? (static::isValidDecorator($decorator) ? $decorator : $namespace . "\\" . $filterclass)
+            : $decorator;
+
+        return $filterFQN;
     }
 
-    private function createResourceDecorator(string $modelname) : string
+    private function createResourceDecorator(string $modelclass) : string
     {
         $namespace = config('distillery.resource.namespace');
-        return "${namespace}\\${modelname}";
+        return "${namespace}\\${modelclass}";
     }
 
     private function isValidDecorator(string $decorator) : bool
