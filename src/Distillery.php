@@ -59,7 +59,7 @@ class Distillery
             is_array($filters)
                 ? collect(array_merge(
                     $this->request->all(),
-                    $filters,
+                    $filters
                 ))
                 : collect($this->request->all())
         );
