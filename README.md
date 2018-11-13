@@ -318,7 +318,7 @@ And to apply it: `/product-list?search=socks&sort=price-desc&color[]=2&color[]=5
 
 - [ ] Add possibility to generate standard predefined filters (sort, search, ...).
 - [x] Make possible to define which paramateres to hide from url query strings.
-- [ ] Add fallback to general filters that can be re-used across different models.
+- [x] Add fallback to general filters that can be re-used across different models.
 - [ ] Write tests.
 
 ## License
