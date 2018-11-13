@@ -56,8 +56,11 @@ class Distillery
     {
         return $this->applyDefaults(
             $model,
-            $filters
-                ? (is_array($filters) ? collect($filters) : $filters)
+            is_array($filters)
+                ? collect(array_merge(
+                    $this->request->all(),
+                    $filters,
+                ))
                 : collect($this->request->all())
         );
     }

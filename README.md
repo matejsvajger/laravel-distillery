@@ -164,7 +164,7 @@ Sometimes you'll want to attach additional filters on server-side. By default yo
 
 Normally you wouldn't want to pass the category id in paramaters since it's already defined with a seo slug.
 
-You can pass aditional filters not defined in URI as an array. If you have a Category filter that accepts an id attach it in your controller:
+You can add aditional filters not defined in URI or overwrite those by passing an array into distill function. _i.e.:_ If you have a Category filter that accepts an id, attach it in your controller:
 
 ```php
 public function list(Request $request, Category $category)
@@ -172,7 +172,6 @@ public function list(Request $request, Category $category)
     return view('product.list',[
         'products' => Product::distill([
             'category' => $category->id,
-            ...$request->all()
         ]);
     ]);	
 }
