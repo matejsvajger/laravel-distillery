@@ -1,0 +1,24 @@
+<?php
+
+namespace DummyNamespace;
+
+use Illuminate\Database\Eloquent\Builder;
+use matejsvajger\Distillery\Contracts\Filter;
+
+class DummyClass implements Filter
+{
+    protected static $allowed = [:allowed_fields];
+
+    public static function apply(Builder $builder, $value)
+    {
+        if (Str::endsWith($value, ['-asc', '-desc'])) {
+            [$field, $dir] = explode('-', $value);
+
+            if (in_array($field, static::$allowed)) {
+                return $builder->orderBy($field, $dir);
+            }
+        }
+
+        return $builder->orderBy(':default_field', ':default_direction');
+    }
+}

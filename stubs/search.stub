@@ -1,0 +1,16 @@
+<?php
+
+namespace DummyNamespace;
+
+use Illuminate\Database\Eloquent\Builder;
+use matejsvajger\Distillery\Contracts\Filter;
+
+class DummyClass implements Filter
+{
+    public static function apply(Builder $builder, $value)
+    {
+        return $builder->where(function ($query) use ($value) {
+            $query->where(':field', 'like', "{$value}%");
+        });
+    }
+}
