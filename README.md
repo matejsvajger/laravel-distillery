@@ -67,7 +67,7 @@ class ProductListController extends Controller
 
 ### Pagination
 
-By default you will get a paginated response of 15 items. This is the default Eloquent model value on `$perPage` property. You can adjust it by overwriting the value in your model or set a default value for `limit` in [distillery model property](#default-filter-values-per-model).
+`distill()` will return a paginated response of 15 items. This is the default Eloquent model value on `$perPage` property. You can adjust it by overwriting the value in your model or set a default value for `limit` in [distillery model property](#default-filter-values-per-model).
 
 To add pagination links to the view call `$products->links();` in your blade template:
 
@@ -91,13 +91,11 @@ To add pagination links to the view call `$products->links();` in your blade tem
 
 There you have it, a paginated list of Product models.
 
-_What!? This is just like Laravels' Paginator! Right, we'll want to filter it too? Ok, carry on._
+_What!? This is just like Laravel's Paginator!_ Right, we'll want to filter it too, eh? Ok, carry on.
 
 ### Filtering
 
-Distillery comes with an Artisan generator command that scaffolds your filter classes for existing models. Signature has two required parameters: `'distillery:filter {filter} {model}'`
-
-For example if we want to filter the above product list with a search query on `name` and `description` we'll need a search filter for product model. Let's create it:
+If we want to filter the above product list with a search query on `name` and `description` we'll need a search filter for product model. Let's create it:
 
 ```sh
 php artisan distillery:filter Search Product
@@ -105,7 +103,7 @@ php artisan distillery:filter Search Product
 
 This will scaffold a Search filter in `app/Filters/Product/Search.php`
 
-The filter class implements one method: `apply(Builder $builder, $value)`, that receives Eloquent builder and the filter value. By default the generated class returns `$builder` without modifications. You'll need write the logic yourself.
+Generated class implements `apply(Builder $builder, $value)` method, that receives Eloquent builder and the filter value.
 
 For the above Search example we would do something like this:
 
@@ -129,9 +127,9 @@ class Search implements Filter
 
 ```
 
-Then to apply the filter to the previous product list you would just add a search query string parameter to the url:
+To apply the filter to the previous product list you can just add a search query string parameter to the url:
 
-`/product-list?search=socks` and the paginated collection will be automatically filtered and pagination links will reflect the set filters.
+`/product-list?search=socks` and the collection will be automatically filtered and pagination links will reflect the set filters.
 
 For more examples on filters check the [**Examples**](#examples) section.
 
@@ -157,6 +155,30 @@ are **reserved** for laravel paginator.
 <hr>
 
 ## Digging deeper
+
+### Artisan Command `distillery:filter`
+
+Distillery comes with an Artisan generator command that scaffolds your filter classes for existing models. Signature has two parameters:
+
+`'distillery:filter {filter} {model?}'`
+
+- `{filter}` Filter name (**required**)
+- `{model?}` Model class name (**optional**)
+
+If you pass in the model name the filter will be generated in the sub-namespace: `App\Filters\{Model}`. Without optional model paramater the filteres are generated in `App\Filters` for general usage on multiple models.
+
+To enable **fallback** to general filters you need to set `'fallback' => true` on the [distillery model property](#enable-fallback-to-general-filters).
+
+During generation you'll be offered to choose from some standard filter templates:
+
+>#### Blank template
+>The generated class returns `$builder` without modifications. You'll need write the logic yourself.
+
+>#### Sorting template
+>You define a list of model fields you wish to sort on and select a default sorting field and direction.
+
+>#### Search template
+>Define the model field to search on. A filter with `"like {$value}%"` will be generated.
 
 ### Serverside filter values
 
@@ -222,6 +244,17 @@ class User extends Model {
 }
 ```
 
+### Enable fallback to general filters
+A model can use a general filter if one in it's namespace isn't defined:
+
+```php
+class User extends Model {
+    protected $distillery = [
+        'fallback' => true
+    ];
+}
+```
+
 ### API Filter-Pagination Route
 _Distillery comes with a standard filtering route, where you can filter/paginate any model automatically without attaching traits to models._
 
@@ -245,7 +278,7 @@ Models filterable by this route need to be added to the `distillery.routing.mode
         ],
 
         'models' => [
-            App\Models\Product::class,
+            'product' => App\Models\Product::class,
         ]
     ],
 ```
@@ -316,7 +349,7 @@ And to apply it: `/product-list?search=socks&sort=price-desc&color[]=2&color[]=5
 
 ## Roadmap to 1.0.0
 
-- [ ] Add possibility to generate standard predefined filters (sort, search, ...).
+- [x] Add possibility to generate standard predefined filters (sort, search, ...).
 - [x] Make possible to define which paramateres to hide from url query strings.
 - [x] Add fallback to general filters that can be re-used across different models.
 - [ ] Write tests.

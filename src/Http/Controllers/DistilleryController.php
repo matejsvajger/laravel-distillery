@@ -14,18 +14,12 @@ class DistilleryController extends Controller
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
-    public function boil(Request $request, $model)
+    public function boil($key)
     {
-        $allowed    = config('distillery.routing.models');
-        $namespace  = config('distillery.models.namespace');
-        $modelname  = Str::studly(
-            Str::singular($model)
-        );
+        $models = config('distillery.routing.models');
 
-        $class = "${namespace}\\${modelname}";
-
-        return class_exists($class) && in_array($class, $allowed)
-            ? Distillery::distill($class)->toArray($request)
+        return array_key_exists($key, $models) && class_exists($models[$key])
+            ? Distillery::distill($models[$key])
             : abort(404);
     }
 }
