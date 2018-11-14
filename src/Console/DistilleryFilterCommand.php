@@ -30,6 +30,37 @@ class DistilleryFilterCommand extends GeneratorCommand
      */
     protected $type = 'Filter';
 
+
+    protected $template = 'Blank';
+
+    /**
+     * List of fields to sort on.
+     *
+     * @var string
+     */
+    protected $sortFields;
+
+    /**
+     * Default field to sort on.
+     *
+     * @var string
+     */
+    protected $defaultSortField;
+
+    /**
+     * Default direction of sorting.
+     *
+     * @var string
+     */
+    protected $defaultSortDirection;
+
+    /**
+     * Name of field to search on..
+     *
+     * @var string
+     */
+    protected $searchField;
+
     /**
      * Execute the console command.
      *
@@ -49,9 +80,34 @@ class DistilleryFilterCommand extends GeneratorCommand
             }
         }
 
-        if (parent::handle() === false && ! $this->option('force')) {
-            return;
+        $filter = $this->getDefaultNamespace(null) . '\\' . $name;
+        $this->comment("\nYou're about to generate {$filter} filter.");
+
+        $this->template = $this->choice('Choose a filter template:', ['Blank', 'Sorting', 'Search'], 0);
+
+        // Handle selected template data
+        $templateHanle = 'handle' . $this->template;
+        if (method_exists($this, $templateHanle)) {
+            $this->$templateHanle();
         }
+
+        // Standard generator handle
+        $name = $this->qualifyClass($this->getNameInput());
+        $path = $this->getPath($name);
+
+        if ((! $this->hasOption('force') ||
+             ! $this->option('force')) &&
+             $this->alreadyExists($this->getNameInput())) {
+            $this->error($this->type.' already exists!');
+
+            return false;
+        }
+
+        $this->makeDirectory($path);
+
+        $this->files->put($path, $this->buildClass($name));
+
+        $this->info($this->type.' created successfully.');
     }
 
     /**
@@ -71,6 +127,21 @@ class DistilleryFilterCommand extends GeneratorCommand
         }
 
         return null;
+    }
+
+    public function handleSorting()
+    {
+        $this->sortFields = $this->ask('On which fields do you wish to sort? (enter comma seperated values)');
+        $this->defaultSortField = $this->choice('On which field do you wish to sort by default?', array_map(
+            function ($field) { return trim($field); },
+            explode(',', $this->sortFields)
+        ), 0);
+        $this->defaultSortDirection = $this->choice('Default sorting direction?', ['asc', 'desc']);
+    }
+
+    public function handleSearch()
+    {
+        $this->searchField = $this->ask('On which field do you wish to search on?');
     }
 
     /**
@@ -109,7 +180,64 @@ class DistilleryFilterCommand extends GeneratorCommand
         );
     }
 
+    /**
+     * Build the class with the given name.
+     *
+     * @param  string  $name
+     * @return string
+     */
+    protected function buildClass($name)
+    {
+        $stub = $this->files->get($this->getStub());
+        $templateSeeder = 'replace'. $this->template . 'Placeholders';
 
+        $template = $this
+            ->replaceNamespace($stub, $name)
+            ->replaceClass($stub, $name);
+
+        return method_exists($this, $templateSeeder)
+            ? $this->$templateSeeder($template, $name)
+            : $template;
+    }
+
+    /**
+     * Replace the placeholders for the sorting stub.
+     *
+     * @param  string  $stub
+     * @param  string  $name
+     * @return $this
+     */
+    protected function replaceSortingPlaceholders(&$stub, $name)
+    {
+        return str_replace(
+            [':allowed_fields', ':default_field', ':default_direction'],
+            [
+                "'" .implode("', '", array_map(
+                    function ($field) { return trim($field); },
+                    explode(',', $this->sortFields)
+                )) . "'",
+                trim($this->defaultSortField),
+                $this->defaultSortDirection
+            ],
+            $stub
+        );
+    }
+
+    /**
+     * Replace the placeholders for the search stub.
+     *
+     * @param  string  $stub
+     * @param  string  $name
+     * @return $this
+     */
+    protected function replaceSearchPlaceholders(&$stub, $name)
+    {
+        return str_replace(
+            [':field'],
+            [$this->searchField],
+            $stub
+        );
+    }
 
     /**
      * Get the stub file for the generator.
@@ -118,7 +246,8 @@ class DistilleryFilterCommand extends GeneratorCommand
      */
     protected function getStub()
     {
-        return __DIR__.'/../../stubs/filter.stub';
+        $stub = strtolower($this->template);
+        return __DIR__."/../../stubs/{$stub}.stub";
     }
 
     /**
