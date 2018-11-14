@@ -349,7 +349,7 @@ And to apply it: `/product-list?search=socks&sort=price-desc&color[]=2&color[]=5
 
 ## Roadmap to 1.0.0
 
-- [ ] Add possibility to generate standard predefined filters (sort, search, ...).
+- [x] Add possibility to generate standard predefined filters (sort, search, ...).
 - [x] Make possible to define which paramateres to hide from url query strings.
 - [x] Add fallback to general filters that can be re-used across different models.
 - [ ] Write tests.
