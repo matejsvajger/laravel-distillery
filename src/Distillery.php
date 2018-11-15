@@ -2,6 +2,7 @@
 
 namespace matejsvajger\Distillery;
 
+use Cache;
 use ReflectionClass;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -21,23 +22,30 @@ class Distillery
 
     public function distill($model, $filters = null) : DistilledCollection
     {
-        $model = is_string($model) ? new $model : $model;
+        $model    = is_string($model) ? new $model : $model;
+        $filters  = $this->buildFilters($model, $filters);
+        $cacheTag = 'distillery-' . md5($filters->toJson());
 
+        return config('distillery.cache.enabled')
+            ? Cache::remember($cacheTag, config('distillery.cache.time'), function () use ($model, $filters) {
+                $this->response($model, $filters);
+            })
+            : $this->response($model, $filters);
+    }
+
+    public function response(Model $model, Collection $filters)
+    {
         return new DistilledCollection(
-            $this->filter($model, $filters),
+            $this->paginator($model, $filters),
             $this->buildFilters($model, $filters),
             $this->collects($model),
             $model->getDistilleryConfig()
         );
     }
 
-    public function filter($model, $filters = null) : AbstractPaginator
+    public function paginator(Model $model, Collection $filters) : AbstractPaginator
     {
-        $model   = is_string($model) ? new $model : $model;
-        $filters = $this->buildFilters($model, $filters);
-        $builder = static::applyFilters($model, $filters);
-
-        return $builder->paginate(
+        return $this->applyFilters($model, $filters)->paginate(
             $filters->get('limit', $model->getPerPage())
         );
     }

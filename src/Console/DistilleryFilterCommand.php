@@ -133,7 +133,9 @@ class DistilleryFilterCommand extends GeneratorCommand
     {
         $this->sortFields = $this->ask('On which fields do you wish to sort? (enter comma seperated values)');
         $this->defaultSortField = $this->choice('On which field do you wish to sort by default?', array_map(
-            function ($field) { return trim($field); },
+            function ($field) {
+                return trim($field);
+            },
             explode(',', $this->sortFields)
         ), 0);
         $this->defaultSortDirection = $this->choice('Default sorting direction?', ['asc', 'desc']);
@@ -213,7 +215,9 @@ class DistilleryFilterCommand extends GeneratorCommand
             [':allowed_fields', ':default_field', ':default_direction'],
             [
                 "'" .implode("', '", array_map(
-                    function ($field) { return trim($field); },
+                    function ($field) {
+                        return trim($field);
+                    },
                     explode(',', $this->sortFields)
                 )) . "'",
                 trim($this->defaultSortField),

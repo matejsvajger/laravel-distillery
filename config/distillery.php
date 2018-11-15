@@ -10,7 +10,7 @@ return [
     | You can setup the default filter namespace, giving you full control
     | over where the filters for models will be generated.
     |
-     */
+    */
 
     'filters' => [
         'namespace' => 'App\\Filters',
@@ -80,5 +80,21 @@ return [
             //
         ]
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Distillery Cache Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Enable / disable caching paginated results and set cache time in minutes.
+    |
+    */
+
+    'cache' => [
+
+        'enabled' => false,
+
+        'time' => 60
+    ]
 
 ];
