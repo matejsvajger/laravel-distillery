@@ -28,7 +28,7 @@ class Distillery
 
         return config('distillery.cache.enabled')
             ? Cache::remember($cacheTag, config('distillery.cache.time'), function () use ($model, $filters) {
-                $this->response($model, $filters);
+                return $this->response($model, $filters);
             })
             : $this->response($model, $filters);
     }
