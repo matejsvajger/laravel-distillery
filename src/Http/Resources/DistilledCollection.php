@@ -20,7 +20,7 @@ class DistilledCollection extends ResourceCollection
      * @param  string  $collects
      * @return void
      */
-    public function __construct($resource, Collection $filters, string $collects = null, array $config = null)
+    public function __construct($resource, Collection $filters, string $collects = null, Collection $config = null)
     {
         $this->config   = $config;
         $this->filters  = $filters;
@@ -145,7 +145,7 @@ class DistilledCollection extends ResourceCollection
      */
     protected function qs()
     {
-        $hidden  = is_array($this->config) && array_key_exists('hidden', $this->config) ? $this->config['hidden'] : [];
+        $hidden  = $this->config->get('hidden') ?? [];
         $filters = $this->filters->except(array_merge(
             ['page'],
             $hidden

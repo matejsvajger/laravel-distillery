@@ -39,7 +39,7 @@ class Distillery
             $this->paginator($model, $filters),
             $this->buildFilters($model, $filters),
             $this->collects($model),
-            $model->getDistilleryConfig()
+            $this->getConfig($model)
         );
     }
 
@@ -76,9 +76,9 @@ class Distillery
 
     private function applyDefaults(Model $model, Collection $filters)
     {
-        $config = $model->getDistilleryConfig();
-        if (array_key_exists('default', $config) && is_array($config['default'])) {
-            foreach ($config['default'] as $key => $value) {
+        $config = $this->getConfig($model);
+        if (is_array($config->get('default'))) {
+            foreach ($config->get('default') as $key => $value) {
                 ! $filters->has($key) && $filters->put($key, $value);
             }
         }
@@ -103,10 +103,10 @@ class Distillery
 
     private function createFilterDecorator(Model $model, string $filter) : string
     {
-        $config = $model->getDistilleryConfig();
-        $namespace = config('distillery.filters.namespace');
+        $config     = $this->getConfig($model);
+        $fallback   = $config->get('fallback') === true;
+        $namespace  = config('distillery.filters.namespace');
         $modelclass = with(new ReflectionClass($model))->getShortName();
-        $fallback = array_key_exists('fallback', $config) && $config['fallback'] === true;
 
         $filterclass = str_replace(' ', '', ucwords(
             str_replace('_', ' ', strtolower($filter))
@@ -129,5 +129,14 @@ class Distillery
     private function isValidDecorator(string $decorator) : bool
     {
         return class_exists($decorator);
+    }
+
+    private function getConfig(Model $model)
+    {
+        return collect(
+            method_exists($model, 'getDistilleryConfig')
+                ? $model->getDistilleryConfig()
+                : null
+        );
     }
 }
